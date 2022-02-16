@@ -1,0 +1,64 @@
+<?php
+session_start();
+
+// If the login has not been entered
+if(!isset($_SESSION["login"]))
+	header('Location: index.php');
+?>
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <script type = "text/javascript" src = "dynamicTable.js" ></script>
+        <style>
+            table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            }
+            table tr:nth-child(even) {
+            background-color: #eee;
+            }
+            table tr:nth-child(odd) {
+            background-color: #fff;
+            }
+            table th {
+            background-color: black;
+            color: white;
+            }
+            table{
+              width: 100%;
+            }
+        </style>
+        <title>Popularité</title>
+    </head>
+
+    <body>
+        <h1>Popularité</h1>
+
+        <div id="table_div"></div>
+
+        <br>
+        <button type="button" onclick="location.href='main_menu.php'">Page précédente</button>
+
+        <?php
+        include 'Connection.php';
+        $db = unserialize($_SESSION['db']);
+
+        $query = "SELECT nom_serie, n_saison, n_episode, COUNT(DISTINCT(numero)) as nb_watchers
+                  FROM regarde
+                  GROUP BY nom_serie, n_saison, n_episode
+                  ORDER BY nb_watchers DESC, nom_serie ASC, n_saison ASC, n_episode ASC";
+
+        $req = $db->query($query);
+        $table = $req->fetchAll(\PDO::FETCH_ASSOC);
+        ?>
+
+        <script type="text/javascript">
+        // Display search table
+        var dbArray = <?php echo json_encode($GLOBALS['table']); ?>;
+        var tableId = "episodes_popularity_table";
+        var headers = Object.keys(dbArray[0]);
+        document.getElementById("table_div").appendChild(createTable(headers, dbArray, tableId));
+        </script>
+    </body>
+</html>
